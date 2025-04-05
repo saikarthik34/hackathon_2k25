@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Directory Audit (Flask)</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <h2>📁 Directory Audit Tool (Flask Web App)</h2>
+
+    <div class="section">
+        <label>Enter Directory Path:</label>
+        <input type="text" id="dirInput">
+        <div class="btn-container">
+            <button class="btn" onclick="addDirectory()">Add</button>
+            <button class="btn" onclick="clearDirectories()">Clear</button>
+        </div>
+    </div>
+
+    <div class="section">
+        <h3>📂 Directories to Audit</h3>
+        <textarea id="dirList" rows="5" readonly>{{ directories|join('\n') }}</textarea>
+        <button class="btn" onclick="runAudit()">Run Audit</button>
+    </div>
+
+    <div class="section">
+        <h3>📊 Audit Results</h3>
+        <div id="result"></div>
+    </div>
+
+    <script>
+        function addDirectory() {
+            const input = document.getElementById("dirInput").value;
+            fetch('/add_directory', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ directory: input })
+            })
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById("dirList").value = data.directories.join("\n");
+                document.getElementById("dirInput").value = "";
+            });
+        }
+
+        function clearDirectories() {
+            fetch('/clear_directories', { method: 'POST' })
+                .then(() => {
+                    document.getElementById("dirList").value = "";
+                    document.getElementById("result").innerText = "";
+                });
+        }
+
+        function runAudit() {
+            fetch('/run_audit')
+                .then(res => res.json())
+                .then(data => {
+                    document.getElementById("result").innerText = data.results.join("\n");
+                });
+        }
+    </script>
+</body>
+</html>
